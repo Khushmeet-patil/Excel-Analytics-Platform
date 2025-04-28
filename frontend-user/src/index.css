@@ -1,68 +1,31 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
   }
-  a:hover {
-    color: #747bff;
+  
+  body {
+    @apply bg-gray-50;
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white font-semibold px-8 py-2.5 rounded-full shadow-xl border-0 hover:from-green-500 hover:to-green-700 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-200 active:scale-100;
+  }
+  .btn-secondary {
+    @apply bg-white text-green-700 font-semibold px-8 py-2.5 rounded-full shadow-md border border-green-400 hover:bg-green-50 hover:text-green-800 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-green-200 transition-all duration-200 active:scale-100;
+  }
+  .btn-dark {
+    @apply bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 font-semibold px-8 py-2.5 rounded-full shadow-md border border-gray-300 hover:bg-gray-200 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 active:scale-100;
+  }
+  
+  .btn-outline {
+    @apply border border-green-600 text-green-600 px-4 py-2 rounded-md hover:bg-green-50 transition-colors;
+  }
+  
+  .input-field {
+    @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent;
   }
 }
