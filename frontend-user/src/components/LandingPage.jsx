@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronRight, BarChart3, LineChart, PieChart, Upload, Database } from 'lucide-react';
 import AuthModal from './AuthModal';
 
 const LandingPage = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleAuth = async (formData, isLogin) => {
     try {
@@ -17,7 +19,7 @@ const LandingPage = () => {
         const data = await response.json();
         if (response.ok) {
           localStorage.setItem('token', data.token);
-          alert('Login successful');
+          navigate('/dashboard');
         } else {
           alert(data.msg || 'Login failed');
         }
@@ -31,7 +33,7 @@ const LandingPage = () => {
         const data = await response.json();
         if (response.ok) {
           localStorage.setItem('token', data.token);
-          alert('Registration successful');
+          navigate('/dashboard');
         } else {
           alert(data.msg || 'Registration failed');
         }
