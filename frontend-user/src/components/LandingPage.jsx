@@ -1,49 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, BarChart3, LineChart, PieChart, Upload, Database } from 'lucide-react';
 import AuthModal from './AuthModal';
 
 const LandingPage = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMessage, setAuthMessage] = useState({ text: '', type: '' });
   const navigate = useNavigate();
 
-  const handleAuth = async (formData, isLogin) => {
-    try {
-      if (isLogin) {
-        // Login API call
-        const response = await fetch('http://localhost:5000/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
-        const data = await response.json();
-        if (response.ok) {
-          localStorage.setItem('token', data.token);
-          navigate('/dashboard');
-        } else {
-          alert(data.msg || 'Login failed');
-        }
-      } else {
-        // Registration API call
-        const response = await fetch('http://localhost:5000/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
-        const data = await response.json();
-        if (response.ok) {
-          localStorage.setItem('token', data.token);
-          navigate('/dashboard');
-        } else {
-          alert(data.msg || 'Registration failed');
-        }
-      }
-    } catch (error) {
-      console.error('Auth error:', error);
-      alert('An error occurred. Please try again.');
+  useEffect(() => {
+    // Check if user is already logged in
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/dashboard');
     }
-    setIsAuthModalOpen(false);
+  }, [navigate]);
+
+  const handleAuth = async (data, isLogin) => {
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+      navigate('/dashboard');
+    } else {
+      setAuthMessage({ text: data.msg || 'Authentication failed', type: 'error' });
+    }
   };
+
+  const currentYear = new Date().getFullYear();
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-white to-green-50">
@@ -81,7 +63,7 @@ const LandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="w-full relative overflow-hidden">
+      <div className="w-full relative">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="min-h-[calc(100vh-4rem)] flex items-center">
             <div className="w-full text-center lg:text-left lg:grid lg:grid-cols-12 lg:gap-8 items-center">
@@ -134,8 +116,8 @@ const LandingPage = () => {
       </div>
 
       {/* Features Section */}
-      <div id="features" className="w-full min-h-screen flex items-center">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-24">
+      <div id="features" className="w-full py-24">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Powerful Features for Data Analysis</h2>
             <p className="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
@@ -144,7 +126,7 @@ const LandingPage = () => {
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             <div className="bg-white p-6 rounded-lg shadow-md border border-green-100 hover:shadow-lg transition-shadow">
-              <div className="text-green-600 text-3xl mb-4">
+              <div className="text-green-600 mb-4">
                 <BarChart3 className="h-10 w-10" />
               </div>
               <h3 className="text-lg font-medium text-gray-900">Interactive Charts</h3>
@@ -153,7 +135,7 @@ const LandingPage = () => {
               </p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md border border-green-100 hover:shadow-lg transition-shadow">
-              <div className="text-green-600 text-3xl mb-4">
+              <div className="text-green-600 mb-4">
                 <LineChart className="h-10 w-10" />
               </div>
               <h3 className="text-lg font-medium text-gray-900">AI-Powered Insights</h3>
@@ -162,7 +144,7 @@ const LandingPage = () => {
               </p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md border border-green-100 hover:shadow-lg transition-shadow">
-              <div className="text-green-600 text-3xl mb-4">
+              <div className="text-green-600 mb-4">
                 <PieChart className="h-10 w-10" />
               </div>
               <h3 className="text-lg font-medium text-gray-900">User Dashboard</h3>
@@ -175,8 +157,8 @@ const LandingPage = () => {
       </div>
 
       {/* How It Works Section */}
-      <div id="how-it-works" className="w-full min-h-screen flex items-center bg-white border-y border-green-100">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-24">
+      <div id="how-it-works" className="w-full py-24 bg-white border-y border-green-100">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">How It Works</h2>
             <p className="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
@@ -194,7 +176,7 @@ const LandingPage = () => {
               </p>
             </div>
             <div className="text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify      justify-center rounded-full bg-green-100 text-green-600">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
                 <Database className="h-8 w-8" />
               </div>
               <h3 className="mt-6 text-xl font-bold text-gray-900">2. Select Analysis Options</h3>
@@ -239,7 +221,7 @@ const LandingPage = () => {
             <div>
               <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Product</h3>
               <ul className="mt-4 space-y-4">
-                <li><a href="#" className="text-base text-gray-300 hover:text-white">Features</a></li>
+                <li><a href="#features" className="text-base text-gray-300 hover:text-white">Features</a></li>
                 <li><a href="#" className="text-base text-gray-300 hover:text-white">Pricing</a></li>
                 <li><a href="#" className="text-base text-gray-300 hover:text-white">Security</a></li>
               </ul>
@@ -270,14 +252,22 @@ const LandingPage = () => {
           </div>
           <div className="mt-12 border-t border-gray-700 pt-8">
             <p className="text-base text-gray-400 text-center">
-              © {new Date().getFullYear()} Excel Analytics. All rights reserved.
+              © {currentYear} Excel Analytics. All rights reserved.
             </p>
           </div>
         </div>
       </footer>
 
       {/* Auth Modal */}
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} onAuth={handleAuth} />
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setAuthMessage({ text: '', type: '' });
+        }} 
+        onAuth={handleAuth}
+        message={authMessage}
+      />
     </div>
   );
 };

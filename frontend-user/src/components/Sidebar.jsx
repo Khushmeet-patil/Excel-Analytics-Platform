@@ -1,10 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Upload, BarChart2, PieChart, Settings } from 'lucide-react';
+import { Home, Folder, BarChart2, PieChart, Settings } from 'lucide-react';
 
 const Sidebar = () => {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: Home },
-    { name: 'Upload', path: '/upload', icon: Upload },
+    { name: 'My Projects', path: '/projects', icon: Folder },
     { name: 'Charts', path: '/charts', icon: BarChart2 },
     { name: 'Reports', path: '/reports', icon: PieChart },
     { name: 'Settings', path: '/settings', icon: Settings },

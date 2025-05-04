@@ -1,250 +1,190 @@
-import { useSelector } from "react-redux"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
-import { Upload, BarChart2, Zap, Settings, Clock, Star, FileText, Map } from "lucide-react"
-
-// Sample data for charts
-const barData = [
-  { name: "Jan", value: 400 },
-  { name: "Feb", value: 300 },
-  { name: "Mar", value: 600 },
-  { name: "Apr", value: 800 },
-  { name: "May", value: 500 },
-  { name: "Jun", value: 900 },
-]
-
-const pieData = [
-  { name: "Excel", value: 540 },
-  { name: "CSV", value: 320 },
-  { name: "Other", value: 140 },
-]
-
-const COLORS = ["#10B981", "#34D399", "#6EE7B7"]
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { BarChart, FileSpreadsheet, Clock, ArrowRight } from 'lucide-react';
 
 const Dashboard = () => {
-  const { recentFiles } = useSelector((state) => state.files)
-  const { savedVisualizations } = useSelector((state) => state.visualizations)
+  const [recentFiles, setRecentFiles] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Sample data for demonstration
-  const sampleRecentFiles = [
-    { id: 1, name: "Q1 Sales Report.xlsx", date: "2023-04-15", size: "2.4 MB" },
-    { id: 2, name: "Customer Data 2023.csv", date: "2023-04-10", size: "4.1 MB" },
-    { id: 3, name: "Marketing Budget.xlsx", date: "2023-04-05", size: "1.8 MB" },
-    { id: 4, name: "Product Inventory.xlsx", date: "2023-04-01", size: "3.2 MB" },
-  ]
+  useEffect(() => {
+    const fetchRecentFiles = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/files/recent', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
 
-  const sampleVisualizations = [
-    { id: 1, name: "Monthly Sales Trend", type: "bar", date: "2023-04-12" },
-    { id: 2, name: "Customer Demographics", type: "pie", date: "2023-04-08" },
-    { id: 3, name: "Regional Performance", type: "map", date: "2023-04-05" },
-    { id: 4, name: "Product Comparison", type: "bar", date: "2023-04-02" },
-  ]
+        if (!response.ok) {
+          throw new Error('Failed to fetch recent files');
+        }
+
+        const data = await response.json();
+        setRecentFiles(data);
+      } catch (err) {
+        console.error('Error fetching recent files:', err);
+        setError('Failed to load recent files');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRecentFiles();
+  }, []);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <div className="flex space-x-2">
-          <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
-            <Upload className="mr-2 -ml-1 h-4 w-4" />
-            Upload
-          </button>
-          <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            <BarChart2 className="mr-2 -ml-1 h-4 w-4" />
-            Create Chart
-          </button>
-          <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            <Zap className="mr-2 -ml-1 h-4 w-4" />
-            Generate Insights
-          </button>
-          <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            <Settings className="mr-2 -ml-1 h-4 w-4" />
-            Settings
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-600">
-              <Upload className="h-6 w-6" />
-            </div>
-            <div className="ml-4">
-              <h2 className="text-sm font-medium text-gray-500">Total Files</h2>
-              <p className="text-2xl font-semibold text-gray-900">128</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-1 text-gray-500">View your recent data analysis and visualizations</p>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-600">
-              <BarChart2 className="h-6 w-6" />
-            </div>
-            <div className="ml-4">
-              <h2 className="text-sm font-medium text-gray-500">Visualizations</h2>
-              <p className="text-2xl font-semibold text-gray-900">45</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-600">
-              <Zap className="h-6 w-6" />
-            </div>
-            <div className="ml-4">
-              <h2 className="text-sm font-medium text-gray-500">AI Insights</h2>
-              <p className="text-2xl font-semibold text-gray-900">32</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-600">
-              <Clock className="h-6 w-6" />
-            </div>
-            <div className="ml-4">
-              <h2 className="text-sm font-medium text-gray-500">Last Upload</h2>
-              <p className="text-sm font-semibold text-gray-900">2 hours ago</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-900">Monthly Data Trends</h2>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={barData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#10B981" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-900">File Type Distribution</h2>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  paddingAngle={5}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-900">Recent Files</h2>
-            <a href="#" className="text-sm font-medium text-green-600 hover:text-green-500">
-              View all
-            </a>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Name
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Date
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Size
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {sampleRecentFiles.map((file) => (
-                  <tr key={file.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <FileText className="h-5 w-5 text-gray-400" />
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{file.name}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{file.date}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{file.size}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-900">Saved Visualizations</h2>
-            <a href="#" className="text-sm font-medium text-green-600 hover:text-green-500">
-              View all
-            </a>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {sampleVisualizations.map((viz) => (
-              <div key={viz.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    {viz.type === "bar" && <BarChart2 className="h-5 w-5 text-green-500" />}
-                    {viz.type === "pie" && <PieChart className="h-5 w-5 text-green-500" />}
-                    {viz.type === "map" && <Map className="h-5 w-5 text-green-500" />}
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-gray-900">{viz.name}</h3>
-                      <p className="text-xs text-gray-500">{viz.date}</p>
-                    </div>
-                  </div>
-                  <button className="text-gray-400 hover:text-gray-500">
-                    <Star className="h-5 w-5" />
-                  </button>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                <FileSpreadsheet size={24} />
               </div>
-            ))}
+              <div className="ml-4">
+                <h2 className="text-lg font-semibold text-gray-900">Total Files</h2>
+                <p className="text-3xl font-bold text-gray-900">{recentFiles.length}</p>
+              </div>
+            </div>
           </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-green-100 text-green-600">
+                <BarChart size={24} />
+              </div>
+              <div className="ml-4">
+                <h2 className="text-lg font-semibold text-gray-900">Visualizations</h2>
+                <p className="text-3xl font-bold text-gray-900">
+                  {recentFiles.filter(file => file.hasVisualization).length}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-purple-100 text-purple-600">
+                <Clock size={24} />
+              </div>
+              <div className="ml-4">
+                <h2 className="text-lg font-semibold text-gray-900">Last Analysis</h2>
+                <p className="text-sm font-medium text-gray-900">
+                  {recentFiles.length > 0 
+                    ? formatDate(recentFiles[0].createdAt) 
+                    : 'No analysis yet'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+          <div className="px-6 py-5 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900">Recent Analysis History</h2>
+          </div>
+          
+          {isLoading ? (
+            <div className="p-8 flex justify-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+            </div>
+          ) : error ? (
+            <div className="p-8 text-center text-red-500">{error}</div>
+          ) : recentFiles.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              <p>No files analyzed yet</p>
+              <Link 
+                to="/upload" 
+                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Upload your first file
+              </Link>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Filename
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date Uploaded
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Columns
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {recentFiles.map((file) => (
+                    <tr key={file._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <FileSpreadsheet className="h-5 w-5 text-gray-400 mr-3" />
+                          <div className="text-sm font-medium text-gray-900">{file.filename}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatDate(file.createdAt)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {file.columns.length}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {file.hasVisualization ? (
+                          <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            Visualized
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                            Uploaded
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <Link 
+                          to={`/visualize/${file._id}`} 
+                          className="text-blue-600 hover:text-blue-900 flex items-center"
+                        >
+                          View <ArrowRight className="ml-1 h-4 w-4" />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;
+
