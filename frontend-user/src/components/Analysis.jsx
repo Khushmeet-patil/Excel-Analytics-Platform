@@ -9,6 +9,10 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
+  BarChart3,
+  Upload, // Replace FileUpload with Upload
+  ArrowLeft,
+  AlertCircle
 } from 'lucide-react';
 
 const Analysis = () => {
@@ -76,7 +80,6 @@ const Analysis = () => {
         setError(err.message);
         console.error('Error fetching project/files:', err);
       } finally {
-éticos
         setIsLoading(false);
       }
     };
@@ -319,52 +322,62 @@ const Analysis = () => {
     }).format(new Date(timestamp));
   };
 
+  // Chart type name formatter
+  const formatChartTypeName = (type) => {
+    const types = {
+      'scatter': 'Scatter Plot',
+      'line': 'Line Chart',
+      'bar': 'Bar Chart',
+      'histogram': 'Histogram',
+      'box': 'Box Plot',
+      'scatter3d': '3D Scatter',
+      'surface': '3D Surface'
+    };
+    return types[type] || type;
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-8 relative">
-        <button
-          onClick={toggleAnalysisPanel}
-          className="absolute top-4 left-4 p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700"
-          title={isAnalysisPanelOpen ? 'Hide Analysis Panel' : 'Show Analysis Panel'}
-        >
-          {isAnalysisPanelOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-        </button>
-
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">{project?.name || 'Analysis Workspace'}</h1>
-          <div className="flex space-x-4">
-            <Link
-              to={`/projects/${projectId}/upload`}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Upload New File
-            </Link>
-            <Link
-              to="/projects"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200"
-            >
-              Back to Projects
-            </Link>
-          </div>
-        </div>
-
+    <div className="min-h-screen bg-green-50">
+      <div className="bg-white shadow-md flex flex-col">
+        {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
-            {error}
+          <div className="mx-4 sm:mx-8 mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 flex items-start">
+            <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+            <p>{error}</p>
           </div>
         )}
 
-        <div className="flex space-x-6">
-          {isAnalysisPanelOpen && (
-            <div className="w-80 bg-gray-50 p-6 rounded-lg shadow-inner flex flex-col space-y-6">
-              <h2 className="text-xl font-bold text-gray-900">Analysis Tools</h2>
+        {/* Loading Indicator */}
+        {isLoading && (
+          <div className="mx-4 sm:mx-8 mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-700">
+            <div className="flex items-center">
+              <svg className="animate-spin h-5 w-5 mr-3 text-blue-500" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p>Loading...</p>
+            </div>
+          </div>
+        )}
 
+        <div className="flex flex-col md:flex-row h-full">
+          {/* Analysis Panel - Collapsible on mobile */}
+          <div className={`${isAnalysisPanelOpen ? 'block' : 'hidden'} md:block w-full md:w-80 bg-gray-50 border-r border-gray-200 p-4 md:p-5 overflow-y-auto`}>
+            <div className="md:hidden flex justify-end mb-4">
+              <button 
+                onClick={toggleAnalysisPanel}
+                className="p-2 rounded-md bg-gray-200 text-gray-700"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Select File</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">Data Source</h3>
                 <select
                   value={selectedFile?._id || ''}
                   onChange={(e) => handleFileSelect(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full p-2 border border-gray-300 rounded-md bg-white shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 >
                   <option value="">Select a file</option>
                   {files.map((file) => (
@@ -374,18 +387,18 @@ const Analysis = () => {
               </div>
 
               {aiSuggestions.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2 flex items-center">
-                    <Lightbulb className="h-5 w-5 text-yellow-500 mr-2" />
+                <div className="rounded-lg bg-blue-50 p-4 border border-blue-100">
+                  <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
+                    <Lightbulb className="h-4 w-4 text-yellow-500 mr-2" />
                     AI Suggestions
                   </h3>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {aiSuggestions.map((suggestion, index) => (
-                      <div key={index} className="p-3 border border-gray-200 rounded-lg bg-white">
-                        <p className="text-sm text-gray-700">{suggestion.description}</p>
+                      <div key={index} className="p-3 border border-blue-200 rounded-lg bg-white shadow-sm">
+                        <p className="text-sm text-gray-700 mb-2">{suggestion.description}</p>
                         <button
                           onClick={() => applyPreprocessing(suggestion.operation, suggestion.params)}
-                          className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                          className="text-xs px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                         >
                           Apply
                         </button>
@@ -396,112 +409,107 @@ const Analysis = () => {
               )}
 
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2 flex items-center">
-                  <Settings2 className="h-5 w-5 text-gray-500 mr-2" />
+                <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
+                  <Settings2 className="h-4 w-4 text-gray-600 mr-2" />
                   Data Preprocessing
                 </h3>
                 <div className="space-y-2">
                   <button
                     onClick={() => applyPreprocessing('remove_nulls', {})}
-                    className="w-full p-3 text-left border border-gray-200 rounded-lg hover:bg-white"
+                    className="w-full px-4 py-3 text-left bg-white border border-gray-200 rounded-lg hover:bg-green-50 transition-colors shadow-sm"
                   >
-                    <p className="text-sm font-medium text-gray-900">Remove Null Values</p>
-                    <p className="text-xs text-gray-500">Eliminate rows with missing data</p>
+                    <p className="text-sm font-medium text-gray-800">Remove Null Values</p>
+                    <p className="text-xs text-gray-500 mt-1">Eliminate rows with missing data</p>
                   </button>
                   <button
                     onClick={() => applyPreprocessing('normalize', { method: 'min-max' })}
-                    className="w-full p-3 text-left border border-gray-200 rounded-lg hover:bg-white"
+                    className="w-full px-4 py-3 text-left bg-white border border-gray-200 rounded-lg hover:bg-green-50 transition-colors shadow-sm"
                   >
-                    <p className="text-sm font-medium text-gray-900">Normalize Data</p>
-                    <p className="text-xs text-gray-500">Scale numerical columns to 0-1</p>
+                    <p className="text-sm font-medium text-gray-800">Normalize Data</p>
+                    <p className="text-xs text-gray-500 mt-1">Scale numerical columns to 0-1</p>
                   </button>
                   <button
                     onClick={() => applyPreprocessing('encode_categorical', {})}
-                    className="w-full p-3 text-left border border-gray-200 rounded-lg hover:bg-white"
+                    className="w-full px-4 py-3 text-left bg-white border border-gray-200 rounded-lg hover:bg-green-50 transition-colors shadow-sm"
                   >
-                    <p className="text-sm font-medium text-gray-900">Encode Categorical</p>
-                    <p className="text-xs text-gray-500">Convert categories to numbers</p>
+                    <p className="text-sm font-medium text-gray-800">Encode Categorical</p>
+                    <p className="text-xs text-gray-500 mt-1">Convert categories to numbers</p>
                   </button>
                 </div>
               </div>
 
               {selectedFile && (
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Download Datasets</h3>
+                  <h3 className="text-md font-semibold text-gray-800 mb-3">Download Options</h3>
                   <div className="space-y-2">
                     <button
                       onClick={() => downloadFile(selectedFile._id, 'original')}
-                      className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-white w-full"
+                      className="flex items-center justify-between w-full px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
                     >
-                      <FileText className="h-5 w-5 text-gray-400 mr-2" />
-                      <span className="text-sm text-gray-900">Download Original Dataset</span>
+                      <span className="text-sm text-gray-800">Original Dataset</span>
+                      <FileText className="h-4 w-4 text-gray-500" />
                     </button>
                     <button
                       onClick={() => downloadFile(selectedFile._id, 'modified')}
-                      className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-white w-full"
+                      className="flex items-center justify-between w-full px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
                     >
-                      <FileText className="h-5 w-5 text-gray-400 mr-2" />
-                      <span className="text-sm text-gray-900">Download Modified Dataset</span>
+                      <span className="text-sm text-gray-800">Modified Dataset</span>
+                      <FileText className="h-4 w-4 text-gray-500" />
                     </button>
                   </div>
                 </div>
               )}
             </div>
-          )}
+          </div>
 
-          <div className="flex-1">
+          {/* Main Content */}
+          <div className="flex-1 overflow-auto p-4 md:p-8 relative">
+            {/* Toggle panel button - visible only on mobile */}
+            {!isAnalysisPanelOpen && (
+              <button 
+                onClick={toggleAnalysisPanel}
+                className="md:hidden fixed top-20 left-0 z-10 p-2 bg-green-600 text-white rounded-r-md"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            )}
+
             {!selectedFile && (
-              <div className="text-center py-12">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">No Files Available</h2>
-                <p className="text-sm text-gray-500 mb-6">Please upload a file to start analyzing data</p>
-                <Link
-                  to={`/projects/${projectId}/upload`}
-                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700"
-                >
-                  Upload File
-                </Link>
+              <div className="flex flex-col items-center justify-center py-16 px-4 sm:px-8">
+                <div className="bg-blue-50 p-6 sm:p-8 rounded-lg max-w-md text-center">
+                  <BarChart3 className="h-16 w-16 mx-auto text-blue-500 mb-4" />
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">No Files Available</h2>
+                  <p className="text-gray-600 mb-6">Please upload a file to start analyzing your data</p>
+                  <Link
+                    to={`/projects/${projectId}/upload`}
+                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 transition-colors"
+                  >
+                    <Upload className="h-5 w-5 mr-2" />
+                    Upload File
+                  </Link>
+                </div>
               </div>
             )}
 
             {selectedFile && (
-              <div className="grid grid-cols-3 gap-6">
-                <div className="col-span-2 space-y-6">
-                  <div>
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">Create Visualization</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">X Axis</label>
-                        <select
-                          value={chartConfig.x}
-                          onChange={(e) => setChartConfig((prev) => ({ ...prev, x: e.target.value }))}
-                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                        >
-                          <option value="">Select column</option>
-                          {selectedFile.columns.map((column) => (
-                            <option key={column} value={column}>{column}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Y Axis</label>
-                        <select
-                          value={chartConfig.y}
-                          onChange={(e) => setChartConfig((prev) => ({ ...prev, y: e.target.value }))}
-                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                        >
-                          <option value="">Select column</option>
-                          {selectedFile.columns.map((column) => (
-                            <option key={column} value={column}>{column}</option>
-                          ))}
-                        </select>
-                      </div>
-                      {is3DChart() && (
+              <div className="w-full">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
+                  {/* Left Side - Visualization & Data */}
+                  <div className="lg:col-span-2 space-y-6 md:space-y-8">
+                    {/* Visualization Settings */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                      <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <BarChart3 className="h-5 w-5 text-green-500 mr-2" />
+                        Create Visualization
+                      </h2>
+                      
+                      <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Z Axis</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">X Axis</label>
                           <select
-                            value={chartConfig.z}
-                            onChange={(e) => setChartConfig((prev) => ({ ...prev, z: e.target.value }))}
-                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            value={chartConfig.x}
+                            onChange={(e) => setChartConfig((prev) => ({ ...prev, x: e.target.value }))}
+                            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 bg-white"
                           >
                             <option value="">Select column</option>
                             {selectedFile.columns.map((column) => (
@@ -509,231 +517,253 @@ const Analysis = () => {
                             ))}
                           </select>
                         </div>
-                      )}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Chart Type</label>
-                        <select
-                          value={chartConfig.type}
-                          onChange={(e) => setChartConfig((prev) => ({ ...prev, type: e.target.value }))}
-                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                        >
-                          <option value="scatter">Scatter</option>
-                          <option value="line">Line</option>
-                          <option value="bar">Bar</option>
-                          <option value="histogram">Histogram</option>
-                          <option value="box">Box Plot</option>
-                          <option value="scatter3d">3D Scatter</option>
-                          <option value="surface">3D Surface</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Chart Title</label>
-                        <input
-                          type="text"
-                          value={chartConfig.title}
-                          onChange={(e) => setChartConfig((prev) => ({ ...prev, title: e.target.value }))}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                          placeholder="Enter chart title"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">X Axis Label</label>
-                        <input
-                          type="text"
-                          value={chartConfig.xLabel}
-                          onChange={(e) => setChartConfig((prev) => ({ ...prev, xLabel: e.target.value }))}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                          placeholder="Enter X axis label"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Y Axis Label</label>
-                        <input
-                          type="text"
-                          value={chartConfig.yLabel}
-                          onChange={(e) => setChartConfig((prev) => ({ ...prev, yLabel: e.target.value }))}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                          placeholder="Enter Y axis label"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end">
-                      <button
-                        onClick={generateVisualization}
-                        disabled={isLoading}
-                        className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                      >
-                        {isLoading ? 'Generating...' : 'Generate Visualization'}
-                      </button>
-                    </div>
-                  </div>
-
-                  {selectedChart ? (
-                    <div className={`bg-white p-4 rounded-lg border border-gray-200 shadow-sm ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
-                      <img
-                        src={selectedChart.chartImage}
-                        alt="Historical Chart"
-                        className="w-full h-auto rounded-lg"
-                        style={{ maxHeight: isFullScreen ? '80vh' : '600px' }}
-                      />
-                      <div className="mt-4 flex justify-between items-center">
-                        <div className="space-x-2">
-                          <button
-                            onClick={() => downloadChartFromHistory(selectedChart.chartImage, selectedChart.chartConfig?.title)}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Y Axis</label>
+                          <select
+                            value={chartConfig.y}
+                            onChange={(e) => setChartConfig((prev) => ({ ...prev, y: e.target.value }))}
+                            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 bg-white"
                           >
-                            <Download className="h-5 w-5 mr-2" />
-                            Download Chart
-                          </button>
-                          <button
-                            onClick={toggleFullScreen}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700"
-                          >
-                            <Maximize2 className="h-5 w-5 mr-2" />
-                            {isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
-                          </button>
-                          <button
-                            onClick={() => setSelectedChart(null)}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700"
-                          >
-                            Back to Current Chart
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : selectedFile?.chartData ? (
-                    <div className={`bg-white p-4 rounded-lg border border-gray-200 shadow-sm ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
-                      <div ref={plotRef}>
-                        <Plot
-                          data={[
-                            {
-                              x: selectedFile.chartData.map((d) => d.x),
-                              y: selectedFile.chartData.map((d) => d.y),
-                              z: selectedFile.chartData.map((d) => d.z),
-                              type: selectedFile.config.type,
-                              mode: ['scatter', 'line'].includes(selectedFile.config.type) ? 'markers+lines' : undefined,
-                              marker: { size: 8 },
-                            },
-                          ]}
-                          layout={{
-                            title: chartConfig.title || `${chartConfig.y} vs ${chartConfig.x}`,
-                            scene: selectedFile.config.type.includes('3d')
-                              ? {
-                                  xaxis: { title: chartConfig.xLabel || chartConfig.x },
-                                  yaxis: { title: chartConfig.yLabel || chartConfig.y },
-                                  zaxis: { title: chartConfig.zLabel || chartConfig.z },
-                                }
-                              : {
-                                  xaxis: { title: chartConfig.xLabel || chartConfig.x },
-                                  yaxis: { title: chartConfig.yLabel || chartConfig.y },
-                                },
-                            height: isFullScreen ? window.innerHeight - 100 : 600,
-                            width: isFullScreen ? window.innerWidth - 100 : undefined,
-                          }}
-                          config={{ responsive: true }}
-                          className="w-full h-full"
-                        />
-                      </div>
-                      <div className="mt-4 flex justify-between items-center">
-                        <div className="space-x-2">
-                          <button
-                            onClick={downloadChart}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                          >
-                            <Download className="h-5 w-5 mr-2" />
-                            Download Chart
-                          </button>
-                          <button
-                            onClick={toggleFullScreen}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700"
-                          >
-                            <Maximize2 className="h-5 w-5 mr-2" />
-                            {isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div>
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">Data Preview</h2>
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            {selectedFile.columns.map((column, idx) => (
-                              <th
-                                key={idx}
-                                scope="col"
-                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                              >
-                                {column}
-                              </th>
+                            <option value="">Select column</option>
+                            {selectedFile.columns.map((column) => (
+                              <option key={column} value={column}>{column}</option>
                             ))}
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {selectedFile.sample &&
-                            selectedFile.sample.map((row, rowIdx) => (
-                              <tr key={rowIdx}>
-                                {selectedFile.columns.map((column, colIdx) => (
-                                  <td
-                                    key={colIdx}
-                                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                          </select>
+                        </div>
+                        {is3DChart() && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Z Axis</label>
+                            <select
+                              value={chartConfig.z}
+                              onChange={(e) => setChartConfig((prev) => ({ ...prev, z: e.target.value }))}
+                              className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 bg-white"
+                            >
+                              <option value="">Select column</option>
+                              {selectedFile.columns.map((column) => (
+                                <option key={column} value={column}>{column}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Chart Type</label>
+                          <select
+                            value={chartConfig.type}
+                            onChange={(e) => setChartConfig((prev) => ({ ...prev, type: e.target.value }))}
+                            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 bg-white"
+                          >
+                            <option value="scatter">Scatter Plot</option>
+                            <option value="line">Line Chart</option>
+                            <option value="bar">Bar Chart</option>
+                            <option value="histogram">Histogram</option>
+                            <option value="box">Box Plot</option>
+                            <option value="scatter3d">3D Scatter</option>
+                            <option value="surface">3D Surface</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Chart Title</label>
+                          <input
+                            type="text"
+                            value={chartConfig.title}
+                            onChange={(e) => setChartConfig((prev) => ({ ...prev, title: e.target.value }))}
+                            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter chart title"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">X Axis Label</label>
+                          <input
+                            type="text"
+                            value={chartConfig.xLabel}
+                            onChange={(e) => setChartConfig((prev) => ({ ...prev, xLabel: e.target.value }))}
+                            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter X axis label"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Y Axis Label</label>
+                          <input
+                            type="text"
+                            value={chartConfig.yLabel}
+                            onChange={(e) => setChartConfig((prev) => ({ ...prev, yLabel: e.target.value }))}
+                            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter Y axis label"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-end">
+                        <button
+                          onClick={generateVisualization}
+                          disabled={isLoading}
+                          className={`inline-flex items-center px-5 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 transition-colors ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        >
+                          {isLoading ? 'Generating...' : 'Generate Visualization'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Visualization Display */}
+                    {selectedChart ? (
+                      <div className={`bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
+                        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                          <h3 className="text-lg font-medium text-gray-900">
+                            {selectedChart.chartConfig?.title || `${selectedChart.chartConfig?.y} vs ${selectedChart.chartConfig?.x}`}
+                          </h3>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => downloadChartFromHistory(selectedChart.chartImage, selectedChart.chartConfig?.title)}
+                              className="inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                            >
+                              <Download className="h-3 w-3 mr-1" />
+                              Download
+                            </button>
+                            <button
+                              onClick={toggleFullScreen}
+                              className="inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                            >
+                              <Maximize2 className="h-3 w-3 mr-1" />
+                              {isFullScreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                            </button>
+                            <button
+                              onClick={() => setSelectedChart(null)}
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700"
+                            >
+                              Back to Current
+                            </button>
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <img
+                            src={selectedChart.chartImage}
+                            alt="Historical Chart"
+                            className="w-full h-auto rounded-lg"
+                            style={{ maxHeight: isFullScreen ? '80vh' : '500px' }}
+                          />
+                        </div>
+                      </div>
+                    ) : selectedFile?.chartData ? (
+                      <div className={`bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
+                        <div className="px-4 md:px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                          <h3 className="text-lg font-medium text-gray-900 mb-2 sm:mb-0">
+                            {chartConfig.title || `${chartConfig.y} vs ${chartConfig.x}`}
+                          </h3>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={downloadChart}
+                              className="inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                            >
+                              <Download className="h-3 w-3 mr-1" />
+                              Download
+                            </button>
+                            <button
+                              onClick={toggleFullScreen}
+                              className="inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                            >
+                              <Maximize2 className="h-3 w-3 mr-1" />
+                              {isFullScreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <Plot
+                            ref={plotRef}
+                            data={selectedFile.chartData}
+                            layout={{
+                              title: chartConfig.title,
+                              xaxis: { title: chartConfig.xLabel || chartConfig.x },
+                              yaxis: { title: chartConfig.yLabel || chartConfig.y },
+                              zaxis: is3DChart() ? { title: chartConfig.zLabel || chartConfig.z } : undefined,
+                              autosize: true,
+                              margin: { l: 50, r: 50, b: 50, t: 50 },
+                            }}
+                            useResizeHandler
+                            style={{ width: '100%', height: isFullScreen ? '80vh' : '400px' }}
+                            config={{ responsive: true }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 text-center">
+                        <p className="text-gray-500">Generate a visualization to see it here.</p>
+                      </div>
+                    )}
+
+                    {/* Data Preview */}
+                    {selectedFile?.sample && (
+                      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                        <h2 className="text-lg font-semibold text-gray-900 mb-4">Data Preview</h2>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                {selectedFile.columns.map((column, index) => (
+                                  <th
+                                    key={index}
+                                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                   >
-                                    {row[column] !== undefined && row[column] !== null ? row[column] : 'N/A'}
-                                  </td>
+                                    {column}
+                                  </th>
                                 ))}
                               </tr>
-                            ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-span-1">
-                  <h2 className="text-lg font-medium text-gray-900 mb-4">Analysis History</h2>
-                  <div className="bg-gray-50 p-4 rounded-lg shadow-inner max-h-[600px] overflow-y-auto">
-                    {project?.chatHistory?.length > 0 ? (
-                      project.chatHistory
-                        .slice()
-                        .reverse()
-                        .map((chat, index) => (
-                          <div
-                            key={index}
-                            className="mb-4 p-3 bg-white rounded-md border border-gray-200 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => chat.chartImage && selectChartFromHistory(chat)}
-                          >
-                            <p className="text-sm text-gray-700">{chat.message}</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {formatChatDate(chat.timestamp)}
-                            </p>
-                            {chat.chartConfig && (
-                              <div className="mt-2">
-                                <p className="text-xs font-medium text-gray-900">
-                                  Chart: {chat.chartConfig.title || `${chat.chartConfig.y} vs ${chat.chartConfig.x}`}
-                                </p>
-                                <p className="text-xs text-gray-600">
-                                  Type: {chat.chartConfig.type.replace('3d', ' 3D').replace(/^\w/, (c) => c.toUpperCase())}
-                                </p>
-                              </div>
-                            )}
-                            {chat.chartImage && (
-                              <img
-                                src={chat.chartImage}
-                                alt="Chart Preview"
-                                className="mt-2 w-full h-auto rounded-md"
-                                style={{ maxHeight: '150px' }}
-                              />
-                            )}
-                          </div>
-                        ))
-                    ) : (
-                      <p className="text-sm text-gray-500">No analysis history available.</p>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {selectedFile.sample.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                  {selectedFile.columns.map((column, colIndex) => (
+                                    <td
+                                      key={colIndex}
+                                      className="px-4 py-4 whitespace-nowrap text-sm text-gray-900"
+                                    >
+                                      {row[column] ?? 'N/A'}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     )}
+                  </div>
+
+                  {/* Right Side - Chart History */}
+                  <div className="lg:col-span-1 space-y-6 md:space-y-8">
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                      <h2 className="text-lg font-semibold text-gray-900 mb-4">Chart History</h2>
+                      {project?.charts?.length > 0 ? (
+                        <div className="space-y-4">
+                          {project.charts.map((chart, index) => (
+                            <div
+                              key={index}
+                              className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                              onClick={() => selectChartFromHistory(chart)}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="mr-2">
+                                  <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                                    {chart.chartConfig?.title || `${chart.chartConfig?.y} vs ${chart.chartConfig?.x}`}
+                                  </p>
+                                  <p className="text-xs text-gray-500">{formatChartTypeName(chart.chartConfig?.type)}</p>
+                                  <p className="text-xs text-gray-400">{formatChatDate(chart.createdAt)}</p>
+                                </div>
+                                <img
+                                  src={chart.chartImage}
+                                  alt="Chart thumbnail"
+                                  className="w-16 h-16 object-cover rounded flex-shrink-0"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No charts generated yet.</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -746,3 +776,6 @@ const Analysis = () => {
 };
 
 export default Analysis;
+
+
+

@@ -1,10 +1,13 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Folder, BarChart2, PieChart, Settings } from 'lucide-react';
 
 const Sidebar = () => {
+  const location = useLocation();
+  const isAnalysisPage = location.pathname.includes('/analysis');
+  
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: Home },
-    { name: 'My Projects', path: '/projects', icon: Folder },
+    { name: 'My Projects', path: '/projects', icon: Folder, active: isAnalysisPage },
     { name: 'Charts', path: '/charts', icon: BarChart2 },
     { name: 'Reports', path: '/reports', icon: PieChart },
     { name: 'Settings', path: '/settings', icon: Settings },
@@ -23,7 +26,7 @@ const Sidebar = () => {
             to={item.path}
             className={({ isActive }) =>
               `flex items-center px-4 py-2 text-sm font-medium rounded-md ${
-                isActive
+                isActive || item.active
                   ? 'bg-green-100 text-green-900'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`
