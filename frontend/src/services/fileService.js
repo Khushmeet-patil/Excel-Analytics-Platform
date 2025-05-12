@@ -203,6 +203,49 @@ export const downloadFile = (fileId, dataType = 'processed') => {
     });
 };
 
+export const featureEngineeringData = async (fileId, operation, params) => {
+  try {
+    const response = await fetch(`${API_URL}/data/features/${fileId}`, {
+      method: 'POST',
+      headers: getHeaders(true),
+      credentials: 'include',
+      body: JSON.stringify({ operation, params }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Error performing feature engineering:', error);
+    throw error;
+  }
+};
+
+export const saveFile = async (fileId) => {
+  try {
+    const response = await fetch(`${API_URL}/data/save/${fileId}`, {
+      method: 'POST',
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error saving file:', error);
+    throw error;
+  }
+};
+
 export const getFileAnalysis = async (fileId) => {
   try {
     const response = await fetch(`${API_URL}/data/analysis/${fileId}`, {

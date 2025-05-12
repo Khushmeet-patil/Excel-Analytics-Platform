@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Menu, X, LayoutDashboard, FileSpreadsheet, PlusSquare, Settings, LogOut, BarChart2 } from 'lucide-react';
+import { Menu, X, LayoutDashboard, FileSpreadsheet, PlusSquare, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { theme } from '../../theme';
@@ -20,8 +20,7 @@ export default function MainLayout({ children }) {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'Projects', path: '/projects', icon: <FileSpreadsheet size={20} /> },
-    { name: 'Analysis', path: '/analysis', icon: <BarChart2 size={20} /> },
-    { name: 'Settings', path: '/settings', icon: <Settings size={20} /> },
+    { name: 'New Project', path: '/projects/new', icon: <PlusSquare size={20} /> },
   ];
 
   const handleLogout = () => {
@@ -35,8 +34,6 @@ export default function MainLayout({ children }) {
     if (location.pathname === '/projects') return 'Projects';
     if (location.pathname === '/projects/new') return 'New Project';
     if (location.pathname.includes('/projects/')) return 'Project Details';
-    if (location.pathname === '/analysis') return 'File Analysis';
-    if (location.pathname === '/settings') return 'Settings';
     return 'Excel Analytics';
   };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, Save, Download, RefreshCw, ExternalLink, PlusSquare, Trash2, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Save, Download, RefreshCw, ExternalLink, PlusSquare, Trash2, AlertCircle, Check, X } from 'lucide-react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getFileById } from '../services/fileService';
+import { getFileById, preprocessData, normalizeData, featureEngineeringData, saveFile, downloadFile } from '../services/fileService';
 import DataGrid from '../components/DataGrid';
 import AIInsightsPanel from '../components/AIInsightsPanel';
 import { useAuth } from '../context/AuthContext';
@@ -11,11 +11,16 @@ export default function ExcelEditor() {
   const [fileData, setFileData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('raw'); // 'raw', 'preprocessed', 'normalized'
+  const [activeTab, setActiveTab] = useState('raw'); // 'raw', 'preprocessing', 'normalization', 'features', 'visualization'
   const [showInsightsPanel, setShowInsightsPanel] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [notification, setNotification] = useState(null);
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+
+
 
   useEffect(() => {
     // Check authentication first
@@ -133,8 +138,47 @@ export default function ExcelEditor() {
   }, [projectId, fileId, isAuthenticated, logout, navigate]);
 
   const handleSave = async () => {
-    // In a real app, implement save functionality
-    alert('Changes saved successfully!');
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      const result = await saveFile(fileId);
+
+      // Show success notification
+      setNotification({
+        type: 'success',
+        message: 'File saved successfully!',
+        timestamp: new Date().toISOString()
+      });
+
+      console.log('File saved successfully:', result);
+    } catch (error) {
+      console.error('Error saving file:', error);
+      setError(error.message || 'Failed to save file');
+
+      // Show error notification
+      setNotification({
+        type: 'error',
+        message: error.message || 'Failed to save file',
+        timestamp: new Date().toISOString()
+      });
+    } finally {
+      setIsSaving(false);
+
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+    }
+  };
+
+  const handleDownload = () => {
+    try {
+      downloadFile(fileId);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      setError(error.message || 'Failed to download file');
+    }
   };
 
   const handleRefresh = async () => {
@@ -213,13 +257,254 @@ export default function ExcelEditor() {
 
       setFileData(fileWithData);
 
+      // Show success notification
+      setNotification({
+        type: 'success',
+        message: 'Data refreshed successfully!',
+        timestamp: new Date().toISOString()
+      });
+
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+
     } catch (error) {
       console.error("Failed to refresh file data:", error);
       setError(error.message || "Failed to refresh data from Cloudinary");
+
+      // Show error notification
+      setNotification({
+        type: 'error',
+        message: error.message || "Failed to refresh data from Cloudinary",
+        timestamp: new Date().toISOString()
+      });
+
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
     } finally {
       setIsRefreshing(false);
     }
   };
+
+  // Function to handle preprocessing operations
+  const handlePreprocessing = async (operation, params = {}) => {
+    try {
+      setIsProcessing(true);
+      setError(null);
+
+      console.log(`Performing preprocessing operation: ${operation}`, params);
+
+      const result = await preprocessData(fileId, operation, params);
+
+      if (!result || !result.processedData) {
+        throw new Error("No data returned from preprocessing operation");
+      }
+
+      // Update the file data with the processed data
+      setFileData(prevData => ({
+        ...prevData,
+        processedData: result.processedData,
+        columns: result.file.columns
+      }));
+
+      // Show success notification
+      setNotification({
+        type: 'success',
+        message: `${operation} completed successfully!`,
+        timestamp: new Date().toISOString()
+      });
+
+      console.log(`Preprocessing operation ${operation} completed successfully`);
+    } catch (error) {
+      console.error(`Error performing preprocessing operation ${operation}:`, error);
+      setError(error.message || `Failed to perform ${operation}`);
+
+      // Show error notification
+      setNotification({
+        type: 'error',
+        message: error.message || `Failed to perform ${operation}`,
+        timestamp: new Date().toISOString()
+      });
+    } finally {
+      setIsProcessing(false);
+      setShowColumnSelector(false);
+
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+    }
+  };
+
+  // Function to handle normalization operations
+  const handleNormalization = async (operation, columns) => {
+    try {
+      setIsProcessing(true);
+      setError(null);
+
+      console.log(`Performing normalization operation: ${operation}`, columns);
+
+      const result = await normalizeData(fileId, operation, columns);
+
+      if (!result || !result.processedData) {
+        throw new Error("No data returned from normalization operation");
+      }
+
+      // Update the file data with the processed data
+      setFileData(prevData => ({
+        ...prevData,
+        processedData: result.processedData,
+        columns: result.file.columns
+      }));
+
+      // Show success notification
+      setNotification({
+        type: 'success',
+        message: `${operation} completed successfully!`,
+        timestamp: new Date().toISOString()
+      });
+
+      console.log(`Normalization operation ${operation} completed successfully`);
+    } catch (error) {
+      console.error(`Error performing normalization operation ${operation}:`, error);
+      setError(error.message || `Failed to perform ${operation}`);
+
+      // Show error notification
+      setNotification({
+        type: 'error',
+        message: error.message || `Failed to perform ${operation}`,
+        timestamp: new Date().toISOString()
+      });
+    } finally {
+      setIsProcessing(false);
+      setShowColumnSelector(false);
+
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+    }
+  };
+
+  // Function to handle feature engineering operations
+  const handleFeatureEngineering = async (operation, params) => {
+    try {
+      setIsProcessing(true);
+      setError(null);
+
+      console.log(`Performing feature engineering operation: ${operation}`, params);
+
+      const result = await featureEngineeringData(fileId, operation, params);
+
+      if (!result || !result.processedData) {
+        throw new Error("No data returned from feature engineering operation");
+      }
+
+      // Update the file data with the processed data
+      setFileData(prevData => ({
+        ...prevData,
+        processedData: result.processedData,
+        columns: result.file.columns
+      }));
+
+      // Show success notification
+      setNotification({
+        type: 'success',
+        message: `${operation} completed successfully!`,
+        timestamp: new Date().toISOString()
+      });
+
+      console.log(`Feature engineering operation ${operation} completed successfully`);
+    } catch (error) {
+      console.error(`Error performing feature engineering operation ${operation}:`, error);
+      setError(error.message || `Failed to perform ${operation}`);
+
+      // Show error notification
+      setNotification({
+        type: 'error',
+        message: error.message || `Failed to perform ${operation}`,
+        timestamp: new Date().toISOString()
+      });
+    } finally {
+      setIsProcessing(false);
+      setShowColumnSelector(false);
+
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+    }
+  };
+
+  // Simplified column selection for specific operations - this replaces the modal approach
+  const handleSimpleColumnSelection = (operation, operationType, additionalParams = {}) => {
+    if (!fileData || !fileData.columns || fileData.columns.length === 0) {
+      setNotification({
+        type: 'error',
+        message: 'No columns available for selection',
+        timestamp: new Date().toISOString()
+      });
+      return;
+    }
+
+    // Show a simple prompt with column names
+    const columnOptions = fileData.columns.map((col, index) =>
+      `${index + 1}. ${col.name} (${col.type})`
+    ).join('\n');
+
+    const message = `Select columns for ${operation} by entering column numbers separated by commas:\n\n${columnOptions}`;
+    const selection = prompt(message);
+
+    if (!selection) return;
+
+    try {
+      // Parse the selection (e.g., "1, 3, 5" -> [0, 2, 4])
+      const selectedIndices = selection.split(',')
+        .map(s => parseInt(s.trim()) - 1)
+        .filter(i => !isNaN(i) && i >= 0 && i < fileData.columns.length);
+
+      if (selectedIndices.length === 0) {
+        setNotification({
+          type: 'error',
+          message: 'No valid columns selected',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      // Get the column IDs from the selected indices
+      const selectedColumnIds = selectedIndices.map(i => fileData.columns[i].id);
+
+      console.log('Selected columns:', selectedColumnIds);
+
+      // Process the operation with the selected columns
+      switch (operationType) {
+        case 'preprocessing':
+          handlePreprocessing(operation, { ...additionalParams, columns: selectedColumnIds });
+          break;
+        case 'normalization':
+          handleNormalization(operation, selectedColumnIds);
+          break;
+        case 'features':
+          handleFeatureEngineering(operation, { ...additionalParams, columns: selectedColumnIds });
+          break;
+        default:
+          console.error('Unknown operation type:', operationType);
+      }
+    } catch (error) {
+      console.error('Error processing column selection:', error);
+      setNotification({
+        type: 'error',
+        message: 'Error processing column selection',
+        timestamp: new Date().toISOString()
+      });
+    }
+  };
+
+
 
   const toolbarButtons = [
     { label: 'Raw Data', value: 'raw' },
@@ -296,12 +581,16 @@ export default function ExcelEditor() {
         <div className="flex space-x-3">
           <button
             onClick={handleSave}
-            className="flex items-center px-3 py-1.5 bg-green-600 text-white rounded-md"
+            className={`flex items-center px-3 py-1.5 bg-green-600 text-white rounded-md ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isSaving}
           >
-            <Save size={18} className="mr-1" />
-            Save
+            <Save size={18} className={`mr-1 ${isSaving ? 'animate-spin' : ''}`} />
+            {isSaving ? 'Saving...' : 'Save'}
           </button>
-          <button className="flex items-center px-3 py-1.5 border border-gray-300 rounded-md">
+          <button
+            onClick={handleDownload}
+            className="flex items-center px-3 py-1.5 border border-gray-300 rounded-md"
+          >
             <Download size={18} className="mr-1" />
             Export
           </button>
@@ -350,13 +639,66 @@ export default function ExcelEditor() {
 
         {activeTab === 'preprocessing' && (
           <>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
+            <button
+              className={`px-3 py-1.5 border border-gray-300 rounded-md text-sm ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => handlePreprocessing('removeDuplicates')}
+              disabled={isProcessing}
+            >
               Remove Duplicates
             </button>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
+            <button
+              className={`px-3 py-1.5 border border-gray-300 rounded-md text-sm ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => handleSimpleColumnSelection('handleMissingValues', 'preprocessing', { strategy: 'fillMean' })}
+              disabled={isProcessing}
+            >
               Handle Missing Values
             </button>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
+            <button
+              className={`px-3 py-1.5 border border-gray-300 rounded-md text-sm ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => {
+                if (fileData && fileData.columns && fileData.columns.length > 0) {
+                  const columnOptions = fileData.columns
+                    .filter(col => col.type === 'number')
+                    .map((col, index) => `${index + 1}. ${col.name}`).join('\n');
+
+                  if (columnOptions.length === 0) {
+                    setNotification({
+                      type: 'error',
+                      message: 'No numeric columns available for outlier filtering',
+                      timestamp: new Date().toISOString()
+                    });
+                    return;
+                  }
+
+                  const message = `Select a column for outlier filtering:\n\n${columnOptions}`;
+                  const selection = prompt(message);
+
+                  if (!selection) return;
+
+                  const selectedIndex = parseInt(selection.trim()) - 1;
+                  const numericColumns = fileData.columns.filter(col => col.type === 'number');
+
+                  if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= numericColumns.length) {
+                    setNotification({
+                      type: 'error',
+                      message: 'Invalid column selection',
+                      timestamp: new Date().toISOString()
+                    });
+                    return;
+                  }
+
+                  const selectedColumn = numericColumns[selectedIndex].id;
+                  handlePreprocessing('filterOutliers', { column: selectedColumn });
+                } else {
+                  setNotification({
+                    type: 'error',
+                    message: 'No columns available for selection',
+                    timestamp: new Date().toISOString()
+                  });
+                }
+              }}
+              disabled={isProcessing}
+            >
               Filter Outliers
             </button>
           </>
@@ -364,13 +706,25 @@ export default function ExcelEditor() {
 
         {activeTab === 'normalization' && (
           <>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
+            <button
+              className={`px-3 py-1.5 border border-gray-300 rounded-md text-sm ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => handleSimpleColumnSelection('minMaxScaling', 'normalization')}
+              disabled={isProcessing}
+            >
               Min-Max Scaling
             </button>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
+            <button
+              className={`px-3 py-1.5 border border-gray-300 rounded-md text-sm ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => handleSimpleColumnSelection('zScoreNormalization', 'normalization')}
+              disabled={isProcessing}
+            >
               Z-Score Normalization
             </button>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
+            <button
+              className={`px-3 py-1.5 border border-gray-300 rounded-md text-sm ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => handleSimpleColumnSelection('logTransform', 'normalization')}
+              disabled={isProcessing}
+            >
               Log Transform
             </button>
           </>
@@ -378,13 +732,41 @@ export default function ExcelEditor() {
 
         {activeTab === 'features' && (
           <>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
+            <button
+              className={`px-3 py-1.5 border border-gray-300 rounded-md text-sm ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => handleSimpleColumnSelection('oneHotEncoding', 'features')}
+              disabled={isProcessing}
+            >
               One-Hot Encoding
             </button>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
+            <button
+              className={`px-3 py-1.5 border border-gray-300 rounded-md text-sm ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => {
+                const newColumnName = prompt('Enter a name for the new feature:');
+                if (newColumnName) {
+                  const operation = prompt('Select operation (sum, average, product):');
+                  if (['sum', 'average', 'product'].includes(operation)) {
+                    handleSimpleColumnSelection('featureExtraction', 'features', {
+                      newColumnName,
+                      operation
+                    });
+                  }
+                }
+              }}
+              disabled={isProcessing}
+            >
               Feature Extraction
             </button>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
+            <button
+              className={`px-3 py-1.5 border border-gray-300 rounded-md text-sm ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => {
+                const numComponents = parseInt(prompt('Enter number of components:') || '0');
+                if (numComponents > 0) {
+                  handleSimpleColumnSelection('pca', 'features', { numComponents });
+                }
+              }}
+              disabled={isProcessing}
+            >
               Principal Component Analysis
             </button>
           </>
@@ -414,6 +796,24 @@ export default function ExcelEditor() {
           </button>
         </div>
       </div>
+
+      {/* Notification */}
+      {notification && (
+        <div className={`fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 ${
+          notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}>
+          <div className="flex items-center">
+            {notification.type === 'success' ? (
+              <Check size={20} className="mr-2" />
+            ) : (
+              <X size={20} className="mr-2" />
+            )}
+            <p>{notification.message}</p>
+          </div>
+        </div>
+      )}
+
+
 
       <div className="flex-1 flex overflow-hidden">
         {/* Main Content Area */}
