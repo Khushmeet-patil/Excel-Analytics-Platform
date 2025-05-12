@@ -9,7 +9,7 @@ export default function Navbar() {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -18,39 +18,42 @@ export default function Navbar() {
   return (
     <nav className="py-4 px-6 shadow-md" style={{ backgroundColor: theme.colors.background.default }}>
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-xl font-bold" style={{ color: theme.colors.text.primary }}>
+        <Link to="/" className="text-xl font-bold" style={{ color: theme.colors.secondary.main }}>
           Excel Analyzer
         </Link>
-        
+
         {currentUser ? (
           <div className="flex items-center space-x-4">
             <span style={{ color: theme.colors.text.primary }}>Welcome, {currentUser.name}</span>
-            <Link 
-              to="/dashboard" 
+            <Link
+              to="/dashboard"
               className="px-4 py-2 rounded-md transition-colors"
-              style={{ 
-                backgroundColor: theme.colors.primary.light,
-                color: theme.colors.text.white
+              style={{
+                backgroundColor: theme.colors.secondary.main,
+                color: theme.colors.secondary.contrastText
               }}
             >
               Dashboard
             </Link>
-            <button 
+            <button
               onClick={handleLogout}
-              className="bg-transparent text-red-700 hover:bg-red-700 hover:text-white px-4 py-2 rounded-md border border-red-700 transition-colors"
-              style={{ borderColor: theme.colors.text.primary }}
+              className="bg-transparent hover:bg-red-700 hover:text-white px-4 py-2 rounded-md border transition-colors"
+              style={{
+                borderColor: theme.colors.error.main,
+                color: theme.colors.error.main
+              }}
             >
               Logout
             </button>
-            
+
             {/* Profile Icon */}
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                style={{ 
-                  backgroundColor: theme.colors.primary.main,
-                  color: theme.colors.text.white
+                style={{
+                  backgroundColor: theme.colors.secondary.main,
+                  color: theme.colors.secondary.contrastText
                 }}
               >
                 {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : (
@@ -59,34 +62,34 @@ export default function Navbar() {
                   </svg>
                 )}
               </button>
-              
+
               {isProfileMenuOpen && (
-                <div 
+                <div
                   className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-10"
                   style={{ backgroundColor: theme.colors.background.paper }}
                 >
-                  <Link 
-                    to="/profile" 
-                    className="block px-4 py-2 text-sm hover:bg-opacity-10 transition-colors"
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
                     style={{ color: theme.colors.text.primary }}
                     onClick={() => setIsProfileMenuOpen(false)}
                   >
                     Your Profile
                   </Link>
-                  <Link 
-                    to="/settings" 
-                    className="block px-4 py-2 text-sm hover:bg-opacity-10 transition-colors"
+                  <Link
+                    to="/settings"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
                     style={{ color: theme.colors.text.primary }}
                     onClick={() => setIsProfileMenuOpen(false)}
                   >
                     Settings
                   </Link>
-                  <button 
+                  <button
                     onClick={() => {
                       setIsProfileMenuOpen(false);
                       handleLogout();
                     }}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-opacity-10 transition-colors"
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
                     style={{ color: theme.colors.error.main }}
                   >
                     Logout
@@ -96,18 +99,18 @@ export default function Navbar() {
             </div>
           </div>
         ) : (
-          <button 
+          <button
             onClick={() => setIsAuthModalOpen(true)}
             className="px-4 py-2 rounded-md transition-colors"
-            style={{ 
-              backgroundColor: theme.colors.primary.main,
-              color: theme.colors.white
+            style={{
+              backgroundColor: theme.colors.secondary.main,
+              color: theme.colors.secondary.contrastText
             }}
           >
             Login
           </button>
         )}
-        
+
         {isAuthModalOpen && !currentUser && (
           <AuthModal onClose={() => setIsAuthModalOpen(false)} />
         )}

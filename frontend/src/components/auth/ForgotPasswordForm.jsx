@@ -32,8 +32,8 @@ export default function ForgotPasswordForm({ onBack }) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium text-gray-900">Reset Password</h3>
-      <p className="text-sm text-gray-600">
+      <h3 className="text-lg font-medium" style={{ color: '#333333' }}>Reset Password</h3>
+      <p className="text-sm" style={{ color: '#666666' }}>
         Enter your email address and we'll send you a link to reset your password.
       </p>
 
@@ -51,7 +51,7 @@ export default function ForgotPasswordForm({ onBack }) {
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+          <label className="block text-sm font-bold mb-2" style={{ color: '#333333' }} htmlFor="email">
             Email
           </label>
           <input
@@ -59,7 +59,11 @@ export default function ForgotPasswordForm({ onBack }) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+            style={{
+              borderColor: '#E0E0E0',
+              ':focus': { borderColor: theme.colors.secondary.main, boxShadow: `0 0 0 2px ${theme.colors.secondary.main}20` }
+            }}
             placeholder="Enter your email"
             required
           />
@@ -68,15 +72,24 @@ export default function ForgotPasswordForm({ onBack }) {
           <button
             type="button"
             onClick={onBack}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 border rounded-md transition-colors"
+            style={{
+              borderColor: '#E0E0E0',
+              color: '#666666',
+              ':hover': { backgroundColor: '#F0F0F0' }
+            }}
           >
             Back to Login
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-            style={{ backgroundColor: theme.colors.primary.main, borderColor: theme.colors.primary.dark }}
+            className="flex-1 font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-colors"
+            style={{
+              backgroundColor: theme.colors.secondary.main,
+              color: theme.colors.secondary.contrastText,
+              ':hover': { backgroundColor: theme.colors.secondary.light }
+            }}
           >
             {loading ? 'Sending...' : 'Send Reset Link'}
           </button>

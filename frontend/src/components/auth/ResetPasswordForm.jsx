@@ -16,7 +16,7 @@ export default function ResetPasswordForm({ token }) {
     setLoading(true);
     setError('');
     setMessage('');
-    
+
     // Validate passwords match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -30,7 +30,7 @@ export default function ResetPasswordForm({ token }) {
       setLoading(false);
       return;
     }
-    
+
     try {
       const result = await resetPasswordWithToken(token, password);
       if (result.success) {
@@ -52,59 +52,71 @@ export default function ResetPasswordForm({ token }) {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h3 className="text-xl font-medium text-gray-900 mb-4">Reset Your Password</h3>
-      <p className="text-sm text-gray-600 mb-6">
+      <h3 className="text-xl font-medium mb-4" style={{ color: '#333333' }}>Reset Your Password</h3>
+      <p className="text-sm mb-6" style={{ color: '#666666' }}>
         Please enter your new password below.
       </p>
-      
+
       {message && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
           {message}
         </div>
       )}
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
-      
+
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+          <label className="block text-sm font-bold mb-2" style={{ color: '#333333' }} htmlFor="password">
             New Password
           </label>
-          <input 
+          <input
             id="password"
-            type="password" 
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" 
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+            style={{
+              borderColor: '#E0E0E0',
+              ':focus': { borderColor: theme.colors.secondary.main, boxShadow: `0 0 0 2px ${theme.colors.secondary.main}20` }
+            }}
             placeholder="Enter your new password"
             required
             minLength={6}
           />
         </div>
         <div>
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="confirmPassword">
+          <label className="block text-sm font-bold mb-2" style={{ color: '#333333' }} htmlFor="confirmPassword">
             Confirm Password
           </label>
-          <input 
+          <input
             id="confirmPassword"
-            type="password" 
+            type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" 
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+            style={{
+              borderColor: '#E0E0E0',
+              ':focus': { borderColor: theme.colors.secondary.main, boxShadow: `0 0 0 2px ${theme.colors.secondary.main}20` }
+            }}
             placeholder="Confirm your new password"
             required
             minLength={6}
           />
         </div>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={loading}
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-          style={{ backgroundColor: theme.colors.primary.main, borderColor: theme.colors.primary.dark }}
+          className="w-full font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-colors"
+          style={{
+            backgroundColor: theme.colors.secondary.main,
+            color: theme.colors.secondary.contrastText,
+            ':hover': { backgroundColor: theme.colors.secondary.light }
+          }}
         >
           {loading ? 'Resetting Password...' : 'Reset Password'}
         </button>

@@ -266,3 +266,63 @@ export const getFileAnalysis = async (fileId) => {
     throw error;
   }
 };
+
+// Local storage key for visualizations
+const VISUALIZATIONS_STORAGE_KEY = 'excel_analytics_visualizations';
+
+// Get visualizations from local storage
+export const getVisualizations = (fileId) => {
+  try {
+    const allVisualizations = JSON.parse(localStorage.getItem(VISUALIZATIONS_STORAGE_KEY) || '{}');
+    return allVisualizations[fileId] || [];
+  } catch (error) {
+    console.error('Error getting visualizations from storage:', error);
+    return [];
+  }
+};
+
+// Save a visualization to local storage
+export const saveVisualization = (fileId, visualization) => {
+  try {
+    const allVisualizations = JSON.parse(localStorage.getItem(VISUALIZATIONS_STORAGE_KEY) || '{}');
+    const fileVisualizations = allVisualizations[fileId] || [];
+
+    // Add unique ID and ensure timestamp
+    const newVisualization = {
+      ...visualization,
+      id: Date.now().toString(),
+      timestamp: visualization.timestamp || new Date().toISOString()
+    };
+
+    // Add to the beginning of the array (newest first)
+    fileVisualizations.unshift(newVisualization);
+
+    // Update storage
+    allVisualizations[fileId] = fileVisualizations;
+    localStorage.setItem(VISUALIZATIONS_STORAGE_KEY, JSON.stringify(allVisualizations));
+
+    return newVisualization;
+  } catch (error) {
+    console.error('Error saving visualization to storage:', error);
+    throw error;
+  }
+};
+
+// Delete a visualization from local storage
+export const deleteVisualization = (fileId, visualizationId) => {
+  try {
+    const allVisualizations = JSON.parse(localStorage.getItem(VISUALIZATIONS_STORAGE_KEY) || '{}');
+    const fileVisualizations = allVisualizations[fileId] || [];
+
+    // Filter out the visualization to delete
+    allVisualizations[fileId] = fileVisualizations.filter(v => v.id !== visualizationId);
+
+    // Update storage
+    localStorage.setItem(VISUALIZATIONS_STORAGE_KEY, JSON.stringify(allVisualizations));
+
+    return allVisualizations[fileId];
+  } catch (error) {
+    console.error('Error deleting visualization from storage:', error);
+    throw error;
+  }
+};

@@ -4,17 +4,21 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: dark;
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --color-primary: #0F593E;
-  --color-primary-light: #1A7A58;
-  --color-primary-dark: #083D2A;
-  --color-secondary: #E8F5E9;
-  --color-background: #0A1F17;
-  --color-paper: #132F25;
+  --color-primary: #FFFFFF;
+  --color-primary-light: #F9FBFA;
+  --color-primary-dark: #F0F0F0;
+  --color-secondary: #0F593E;
+  --color-secondary-light: #1C7A58;
+  --color-secondary-dark: #083D2A;
+  --color-background: #FFFFFF;
+  --color-paper: #F9FBFA;
+  --color-text: #333333;
+  --color-text-secondary: #0F593E;
 }
 
 body {
@@ -22,5 +26,5 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: var(--color-background);
-  color: var(--color-secondary);
+  color: var(--color-text);
 }

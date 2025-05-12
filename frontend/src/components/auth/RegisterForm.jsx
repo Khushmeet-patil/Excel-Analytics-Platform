@@ -87,7 +87,7 @@ export default function RegisterForm({ onSuccess }) {
       )}
 
       <div>
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+        <label className="block text-sm font-bold mb-2" style={{ color: '#333333' }} htmlFor="name">
           Full Name
         </label>
         <input
@@ -95,13 +95,17 @@ export default function RegisterForm({ onSuccess }) {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+          style={{
+            borderColor: '#E0E0E0',
+            ':focus': { borderColor: theme.colors.secondary.main, boxShadow: `0 0 0 2px ${theme.colors.secondary.main}20` }
+          }}
           placeholder="Enter your full name"
           required
         />
       </div>
       <div>
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+        <label className="block text-sm font-bold mb-2" style={{ color: '#333333' }} htmlFor="email">
           Email
         </label>
         <input
@@ -109,13 +113,17 @@ export default function RegisterForm({ onSuccess }) {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+          style={{
+            borderColor: '#E0E0E0',
+            ':focus': { borderColor: theme.colors.secondary.main, boxShadow: `0 0 0 2px ${theme.colors.secondary.main}20` }
+          }}
           placeholder="Enter your email"
           required
         />
       </div>
       <div>
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+        <label className="block text-sm font-bold mb-2" style={{ color: '#333333' }} htmlFor="password">
           Password
         </label>
         <input
@@ -123,7 +131,11 @@ export default function RegisterForm({ onSuccess }) {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+          style={{
+            borderColor: '#E0E0E0',
+            ':focus': { borderColor: theme.colors.secondary.main, boxShadow: `0 0 0 2px ${theme.colors.secondary.main}20` }
+          }}
           placeholder="Create a password"
           required
         />
@@ -131,8 +143,12 @@ export default function RegisterForm({ onSuccess }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-        style={{ backgroundColor: theme.colors.primary.main, borderColor: theme.colors.primary.dark }}
+        className="w-full font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-colors"
+        style={{
+          backgroundColor: theme.colors.secondary.main,
+          color: theme.colors.secondary.contrastText,
+          ':hover': { backgroundColor: theme.colors.secondary.light }
+        }}
       >
         {loading ? 'Creating Account...' : 'Create Account'}
       </button>

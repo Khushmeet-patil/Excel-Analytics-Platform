@@ -1,9 +1,21 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, Save, Download, RefreshCw, ExternalLink, PlusSquare, Trash2, AlertCircle, Check, X } from 'lucide-react';
+import { ChevronLeft, Save, Download, RefreshCw, ExternalLink, PlusSquare, Trash2, AlertCircle, Check, X, Bot } from 'lucide-react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getFileById, preprocessData, normalizeData, featureEngineeringData, saveFile, downloadFile } from '../services/fileService';
+import {
+  getFileById,
+  preprocessData,
+  normalizeData,
+  featureEngineeringData,
+  saveFile,
+  downloadFile,
+  getVisualizations,
+  saveVisualization,
+  deleteVisualization
+} from '../services/fileService';
 import DataGrid from '../components/DataGrid';
 import AIInsightsPanel from '../components/AIInsightsPanel';
+import DataVisualization from '../components/DataVisualization';
+import VisualizationHistory from '../components/VisualizationHistory';
 import { useAuth } from '../context/AuthContext';
 
 export default function ExcelEditor() {
@@ -17,10 +29,78 @@ export default function ExcelEditor() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [visualizations, setVisualizations] = useState([]);
+  const [showColumnSelector, setShowColumnSelector] = useState(false);
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
 
+
+  // Load visualizations from local storage when fileId changes
+  useEffect(() => {
+    if (fileId) {
+      const savedVisualizations = getVisualizations(fileId);
+      setVisualizations(savedVisualizations);
+    }
+  }, [fileId]);
+
+  // Handle saving a new visualization
+  const handleSaveVisualization = (visualizationData) => {
+    try {
+      const savedVisualization = saveVisualization(fileId, visualizationData);
+      setVisualizations(prev => [savedVisualization, ...prev]);
+
+      setNotification({
+        type: 'success',
+        message: 'Visualization saved successfully!',
+        timestamp: new Date().toISOString()
+      });
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+    } catch (error) {
+      console.error('Error saving visualization:', error);
+      setNotification({
+        type: 'error',
+        message: 'Failed to save visualization',
+        timestamp: new Date().toISOString()
+      });
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+    }
+  };
+
+  // Handle deleting a visualization
+  const handleDeleteVisualization = (visualizationId) => {
+    try {
+      const updatedVisualizations = deleteVisualization(fileId, visualizationId);
+      setVisualizations(updatedVisualizations);
+
+      setNotification({
+        type: 'success',
+        message: 'Visualization deleted',
+        timestamp: new Date().toISOString()
+      });
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+    } catch (error) {
+      console.error('Error deleting visualization:', error);
+      setNotification({
+        type: 'error',
+        message: 'Failed to delete visualization',
+        timestamp: new Date().toISOString()
+      });
+
+      setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+    }
+  };
 
   useEffect(() => {
     // Check authentication first
@@ -626,7 +706,56 @@ export default function ExcelEditor() {
               <RefreshCw size={14} className={`mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Refreshing...' : 'Refresh from Cloudinary'}
             </button>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm flex items-center">
+            <button
+              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm flex items-center"
+              onClick={() => {
+                const columnName = prompt('Enter a name for the new column:');
+                if (!columnName) return;
+
+                const columnType = prompt('Enter column type (number or string):');
+                if (!['number', 'string'].includes(columnType)) {
+                  setNotification({
+                    type: 'error',
+                    message: 'Invalid column type. Please use "number" or "string".',
+                    timestamp: new Date().toISOString()
+                  });
+                  return;
+                }
+
+                const defaultValue = prompt(`Enter default value for the column (${columnType === 'number' ? 'numeric value' : 'text'}):`);
+                if (defaultValue === null) return;
+
+                // Add the new column to the data
+                const newColumn = {
+                  id: columnName,
+                  name: columnName,
+                  type: columnType
+                };
+
+                // Update the data with the new column
+                const updatedData = fileData.processedData.map(row => ({
+                  ...row,
+                  [columnName]: columnType === 'number' ? Number(defaultValue) || 0 : defaultValue || ''
+                }));
+
+                // Update the file data
+                setFileData(prevData => ({
+                  ...prevData,
+                  columns: [...prevData.columns, newColumn],
+                  processedData: updatedData
+                }));
+
+                setNotification({
+                  type: 'success',
+                  message: `Column "${columnName}" added successfully!`,
+                  timestamp: new Date().toISOString()
+                });
+
+                setTimeout(() => {
+                  setNotification(null);
+                }, 3000);
+              }}
+            >
               <PlusSquare size={14} className="mr-1" />
               Add Column
             </button>
@@ -774,19 +903,20 @@ export default function ExcelEditor() {
 
         {activeTab === 'visualization' && (
           <>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
-              Histogram
-            </button>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
-              Scatter Plot
-            </button>
-            <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm">
-              Box Plot
-            </button>
+            <div className="text-sm text-gray-600 mr-2">
+              Select columns and create visualizations below
+            </div>
           </>
         )}
 
-        <div className="ml-auto">
+        <div className="ml-auto flex space-x-3">
+          <Link
+            to={`/ai/chat/project/${projectId}/file/${fileId}`}
+            className="px-3 py-1.5 bg-blue-600 text-white rounded-md flex items-center text-sm"
+          >
+            <Bot size={14} className="mr-1" />
+            AI Chat
+          </Link>
           <button
             className="px-3 py-1.5 text-green-600 flex items-center text-sm"
             onClick={() => setShowInsightsPanel(!showInsightsPanel)}
@@ -818,11 +948,28 @@ export default function ExcelEditor() {
       <div className="flex-1 flex overflow-hidden">
         {/* Main Content Area */}
         <div className={`flex-1 ${showInsightsPanel ? 'pr-4' : ''} overflow-auto`}>
-          <DataGrid
-            data={fileData.processedData || fileData.originalData || []}
-            columns={fileData.columns || []}
-            activeTab={activeTab}
-          />
+          {activeTab === 'visualization' ? (
+            <div className="p-4 grid grid-cols-1 gap-6">
+              {/* Data Visualization Component */}
+              <DataVisualization
+                data={fileData.processedData || fileData.originalData || []}
+                columns={fileData.columns || []}
+                onSave={handleSaveVisualization}
+              />
+
+              {/* Visualization History */}
+              <VisualizationHistory
+                visualizations={visualizations}
+                onDelete={handleDeleteVisualization}
+              />
+            </div>
+          ) : (
+            <DataGrid
+              data={fileData.processedData || fileData.originalData || []}
+              columns={fileData.columns || []}
+              activeTab={activeTab}
+            />
+          )}
         </div>
 
         {/* AI Insights Panel */}

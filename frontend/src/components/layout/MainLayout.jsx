@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Menu, X, LayoutDashboard, FileSpreadsheet, PlusSquare, LogOut } from 'lucide-react';
+import { Menu, X, LayoutDashboard, FileSpreadsheet, PlusSquare, LogOut, Bot } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { theme } from '../../theme';
@@ -21,6 +21,7 @@ export default function MainLayout({ children }) {
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'Projects', path: '/projects', icon: <FileSpreadsheet size={20} /> },
     { name: 'New Project', path: '/projects/new', icon: <PlusSquare size={20} /> },
+    { name: 'AI Chat', path: '/ai/chat', icon: <Bot size={20} /> },
   ];
 
   const handleLogout = () => {
@@ -34,6 +35,7 @@ export default function MainLayout({ children }) {
     if (location.pathname === '/projects') return 'Projects';
     if (location.pathname === '/projects/new') return 'New Project';
     if (location.pathname.includes('/projects/')) return 'Project Details';
+    if (location.pathname.includes('/ai/chat')) return 'AI Chat';
     return 'Excel Analytics';
   };
 
@@ -43,10 +45,10 @@ export default function MainLayout({ children }) {
       <div
         className={`${
           sidebarOpen ? 'w-64' : 'w-20'
-        } bg-white shadow-lg transition-all duration-300 z-10 h-screen fixed left-0 top-0`}
-        style={{ backgroundColor: theme.colors.background.paper }}
+        } shadow-lg transition-all duration-300 z-10 h-screen fixed left-0 top-0`}
+        style={{ backgroundColor: theme.colors.primary.main }}
       >
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+        <div className="flex items-center justify-between h-16 px-4 border-b" style={{ borderColor: theme.colors.divider }}>
           {sidebarOpen ? (
             <h1 className="text-xl font-semibold" style={{ color: theme.colors.secondary.main }}>Excel Analytics</h1>
           ) : (
@@ -56,6 +58,7 @@ export default function MainLayout({ children }) {
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-1 rounded-md hover:bg-gray-100"
             aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            style={{ color: theme.colors.text.primary }}
           >
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -68,13 +71,18 @@ export default function MainLayout({ children }) {
                 <Link
                   to={item.path}
                   className={`flex items-center p-3 rounded-md transition-colors ${
-                    isActive(item.path)
-                      ? 'bg-green-50 text-green-600'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  } ${!sidebarOpen ? 'justify-center' : ''}`}
+                    !sidebarOpen ? 'justify-center' : ''
+                  }`}
                   style={isActive(item.path)
-                    ? { backgroundColor: `${theme.colors.secondary.light}20`, color: theme.colors.secondary.main }
-                    : { color: 'gray' }}
+                    ? {
+                        backgroundColor: `${theme.colors.secondary.main}20`,
+                        color: theme.colors.secondary.main
+                      }
+                    : {
+                        color: theme.colors.text.primary,
+                        ':hover': { backgroundColor: theme.colors.primary.dark }
+                      }
+                  }
                   title={!sidebarOpen ? item.name : ""}
                 >
                   <span className={sidebarOpen ? "mr-3" : ""}>{item.icon}</span>
@@ -85,11 +93,12 @@ export default function MainLayout({ children }) {
           </ul>
         </nav>
 
-        <div className="absolute bottom-0 w-full p-4 border-t border-gray-200">
+        <div className="absolute bottom-0 w-full p-4 border-t" style={{ borderColor: theme.colors.divider }}>
           <button
-            className={`flex items-center p-3 rounded-md text-gray-600 hover:bg-gray-50 w-full ${
+            className={`flex items-center p-3 rounded-md w-full ${
               sidebarOpen ? '' : 'justify-center'
             }`}
+            style={{ color: theme.colors.text.primary }}
             onClick={handleLogout}
             title={!sidebarOpen ? "Logout" : ""}
           >
@@ -106,15 +115,16 @@ export default function MainLayout({ children }) {
         }`}
       >
         {/* Top Navigation */}
-        <header className="bg-white shadow-sm h-16 flex items-center px-6">
-          <div className="flex items-center text-gray-600">
-            <span className="font-medium">
+        <header className="shadow-sm h-16 flex items-center px-6" style={{ backgroundColor: theme.colors.primary.main }}>
+          <div className="flex items-center">
+            <span className="font-medium" style={{ color: theme.colors.text.primary }}>
               {getPageTitle()}
             </span>
           </div>
           <div className="ml-auto flex items-center space-x-4">
             <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-semibold">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold"
+                style={{ backgroundColor: theme.colors.secondary.main }}>
                 U
               </div>
             </div>
@@ -122,7 +132,7 @@ export default function MainLayout({ children }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto bg-gray-50 p-6">
+        <main className="flex-1 overflow-auto p-6" style={{ backgroundColor: theme.colors.primary.light }}>
           {children}
         </main>
       </div>

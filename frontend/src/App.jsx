@@ -4,6 +4,7 @@ import ProjectDashboard from './pages/ProjectDashboard';
 import ProjectDetail from './pages/ProjectDetail';
 import ExcelEditor from './pages/ExcelEditor';
 import NewProject from './pages/NewProject';
+import AIChatPage from './pages/AIChat';
 import MainLayout from './components/layout/MainLayout';
 import LandingPage from './pages/LandingPage';
 import { useAuth } from './context/AuthContext';
@@ -69,7 +70,36 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/ai/chat"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <AIChatPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai/chat/project/:projectId"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <AIChatPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai/chat/project/:projectId/file/:fileId"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <AIChatPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Redirect all other routes */}
         <Route path="*" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/" />} />
