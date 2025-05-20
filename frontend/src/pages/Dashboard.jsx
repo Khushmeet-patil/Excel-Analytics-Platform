@@ -58,12 +58,12 @@ export default function Dashboard() {
   const StatCard = ({ title, value, icon, color }) => (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center">
-        <div className={`p-3 rounded-full ${color} text-white mr-4`}>
+        <div className={`p-3 rounded-full text-white mr-4`} style={{ backgroundColor: '#0F593E' }}>
           {icon}
         </div>
         <div>
-          <p className="text-gray-500 text-sm">{title}</p>
-          <h3 className="text-2xl font-bold">{value}</h3>
+          <p className="text-sm" style={{ color: '#666666' }}>{title}</p>
+          <h3 className="text-2xl font-bold" style={{ color: '#333333' }}>{value}</h3>
         </div>
       </div>
     </div>
@@ -72,7 +72,7 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2" style={{ borderColor: '#0F593E' }}></div>
       </div>
     );
   }
@@ -80,8 +80,8 @@ export default function Dashboard() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Dashboard</h1>
-        <p className="text-gray-600">Welcome to your Excel Analytics dashboard</p>
+        <h1 className="text-2xl font-bold mb-2" style={{ color: '#333333' }}>Dashboard</h1>
+        <p style={{ color: '#666666' }}>Welcome to your Excel Analytics dashboard</p>
       </div>
 
       {/* Stats Grid */}
@@ -90,56 +90,52 @@ export default function Dashboard() {
           title="Total Projects"
           value={stats.totalProjects}
           icon={<FileSpreadsheet size={24} />}
-          color="bg-green-600"
         />
         <StatCard
           title="Total Excel Files"
           value={stats.totalFiles}
           icon={<BarChart3 size={24} />}
-          color="bg-blue-600"
         />
         <StatCard
           title="Data Points Analyzed"
           value="12,458"
           icon={<TrendingUp size={24} />}
-          color="bg-purple-600"
         />
         <StatCard
           title="AI Insights Generated"
           value="36"
           icon={<Users size={24} />}
-          color="bg-orange-600"
         />
       </div>
 
       {/* Recent Activity */}
       <div className="bg-white rounded-lg shadow mb-8">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold">Recent Activity</h2>
+        <div className="px-6 py-4 border-b" style={{ borderColor: '#E0E0E0' }}>
+          <h2 className="text-lg font-semibold" style={{ color: '#333333' }}>Recent Activity</h2>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y" style={{ borderColor: '#E0E0E0' }}>
           {stats.recentActivity.length > 0 ? (
             stats.recentActivity.map((activity) => (
               <div key={activity.id} className="px-6 py-4">
                 <div className="flex items-center">
-                  <div className="p-2 rounded-full bg-gray-100 mr-4">
-                    <Clock size={20} className="text-gray-600" />
+                  <div className="p-2 rounded-full mr-4" style={{ backgroundColor: '#F0F0F0' }}>
+                    <Clock size={20} style={{ color: '#0F593E' }} />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium">{activity.name}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium" style={{ color: '#333333' }}>{activity.name}</p>
+                    <p className="text-sm" style={{ color: '#666666' }}>
                       {activity.type === 'project' ? 'Project updated' : 'File uploaded'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-500">{activity.date}</p>
-                    <p className="text-xs text-gray-400">{activity.time}</p>
+                    <p className="text-sm" style={{ color: '#666666' }}>{activity.date}</p>
+                    <p className="text-xs" style={{ color: '#999999' }}>{activity.time}</p>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="px-6 py-4 text-center text-gray-500">
+            <div className="px-6 py-4 text-center" style={{ color: '#666666' }}>
               No recent activity
             </div>
           )}
@@ -149,68 +145,70 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold">Quick Actions</h2>
+          <div className="px-6 py-4 border-b" style={{ borderColor: '#E0E0E0' }}>
+            <h2 className="text-lg font-semibold" style={{ color: '#333333' }}>Quick Actions</h2>
           </div>
           <div className="p-6 space-y-4">
             <Link
               to="/projects/new"
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+              className="flex items-center justify-between p-3 rounded-md transition-colors"
+              style={{ backgroundColor: '#F9FBFA', ':hover': { backgroundColor: '#F0F0F0' } }}
             >
               <div className="flex items-center">
-                <div className="p-2 rounded-full bg-green-100 mr-3">
-                  <PlusSquare size={18} className="text-green-600" />
+                <div className="p-2 rounded-full mr-3" style={{ backgroundColor: 'rgba(15, 89, 62, 0.1)' }}>
+                  <PlusSquare size={18} style={{ color: '#0F593E' }} />
                 </div>
-                <span>Create New Project</span>
+                <span style={{ color: '#333333' }}>Create New Project</span>
               </div>
-              <ArrowRight size={16} className="text-gray-400" />
+              <ArrowRight size={16} style={{ color: '#666666' }} />
             </Link>
             <Link
               to="/projects"
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+              className="flex items-center justify-between p-3 rounded-md transition-colors"
+              style={{ backgroundColor: '#F9FBFA', ':hover': { backgroundColor: '#F0F0F0' } }}
             >
               <div className="flex items-center">
-                <div className="p-2 rounded-full bg-blue-100 mr-3">
-                  <FileSpreadsheet size={18} className="text-blue-600" />
+                <div className="p-2 rounded-full mr-3" style={{ backgroundColor: 'rgba(15, 89, 62, 0.1)' }}>
+                  <FileSpreadsheet size={18} style={{ color: '#0F593E' }} />
                 </div>
-                <span>View All Projects</span>
+                <span style={{ color: '#333333' }}>View All Projects</span>
               </div>
-              <ArrowRight size={16} className="text-gray-400" />
+              <ArrowRight size={16} style={{ color: '#666666' }} />
             </Link>
           </div>
         </div>
 
         <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold">System Status</h2>
+          <div className="px-6 py-4 border-b" style={{ borderColor: '#E0E0E0' }}>
+            <h2 className="text-lg font-semibold" style={{ color: '#333333' }}>System Status</h2>
           </div>
           <div className="p-6">
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between mb-1">
-                  <span className="text-sm text-gray-600">Storage Used</span>
-                  <span className="text-sm font-medium">45%</span>
+                  <span className="text-sm" style={{ color: '#666666' }}>Storage Used</span>
+                  <span className="text-sm font-medium" style={{ color: '#333333' }}>45%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-600 h-2 rounded-full" style={{ width: '45%' }}></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm text-gray-600">API Requests</span>
-                  <span className="text-sm font-medium">68%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '68%' }}></div>
+                <div className="w-full rounded-full h-2" style={{ backgroundColor: '#F0F0F0' }}>
+                  <div className="h-2 rounded-full" style={{ backgroundColor: '#0F593E', width: '45%' }}></div>
                 </div>
               </div>
               <div>
                 <div className="flex justify-between mb-1">
-                  <span className="text-sm text-gray-600">AI Credits</span>
-                  <span className="text-sm font-medium">23%</span>
+                  <span className="text-sm" style={{ color: '#666666' }}>API Requests</span>
+                  <span className="text-sm font-medium" style={{ color: '#333333' }}>68%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-purple-600 h-2 rounded-full" style={{ width: '23%' }}></div>
+                <div className="w-full rounded-full h-2" style={{ backgroundColor: '#F0F0F0' }}>
+                  <div className="h-2 rounded-full" style={{ backgroundColor: '#0F593E', width: '68%' }}></div>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm" style={{ color: '#666666' }}>AI Credits</span>
+                  <span className="text-sm font-medium" style={{ color: '#333333' }}>23%</span>
+                </div>
+                <div className="w-full rounded-full h-2" style={{ backgroundColor: '#F0F0F0' }}>
+                  <div className="h-2 rounded-full" style={{ backgroundColor: '#0F593E', width: '23%' }}></div>
                 </div>
               </div>
             </div>

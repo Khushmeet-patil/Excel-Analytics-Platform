@@ -15,6 +15,7 @@ const authRoutes = require('./routes/authRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const fileRoutes = require('./routes/fileRoutes');
 const dataProcessingRoutes = require('./routes/dataProcessingRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 // Validate required environment variables
@@ -25,7 +26,8 @@ const requiredEnvVars = [
   'CLOUDINARY_API_KEY',
   'CLOUDINARY_API_SECRET',
   'EMAIL_USERNAME',
-  'EMAIL_PASSWORD'
+  'EMAIL_PASSWORD',
+  'GROQ_API_KEY'
 ];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 if (missingEnvVars.length > 0) {
@@ -74,6 +76,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/data', dataProcessingRoutes);
+app.use('/api/ai', aiRoutes);
 
 // User profile route
 app.use('/api/user', require('./routes/userRoutes'));
